@@ -1,23 +1,36 @@
-from flask import Flask, request, render_template, abort
+'''
+This is the entrypoint of the Flask app
+'''
+from flask import Flask, request, render_template
 from EmotionDetection import emotion_detector
 
 app = Flask(__name__)
 
 @app.route("/emotionDetector")
 def detect_emotions():
-    text_to_analyze = request.args.get('textToAnalyze')
-    if not text_to_analyze: abort(400)
-    result = emotion_detector(text_to_analyze)
+    '''
+    This function is a route handler used to detect and return emotions
+    from the given user input as well as which one is the most dominant
+    '''
+    text_to_analyze = request.args.get('textToAnalyze', '')
+    result:dict = emotion_detector(text_to_analyze)
+    dominant_emotion = result.get('dominant_emotion')
+    if not dominant_emotion:
+        return "Invalid text! Please try again!"
     anger = result.get('anger', '')
     disgust = result.get('disgust', '')
     fear = result.get('fear', '')
     joy = result.get('joy', '')
     sadness = result.get('sadness', '')
-    dominant_emotion = result.get('dominant_emotion', '')
-    return f"For the given statement, the system response is 'anger': {anger}, 'disgust': {disgust}, 'fear': {fear}, 'joy': {joy} and 'sadness': {sadness}. The dominant emotion is {dominant_emotion}."
-    
+    return f"For the given statement, the system response is 'anger': {anger}," \
+    + f" 'disgust': {disgust}, 'fear': {fear}, 'joy': {joy} and 'sadness': {sadness}." \
+    + f" The dominant emotion is {dominant_emotion}."
+
 @app.route("/")
 def home():
+    '''
+    Displays home page
+    '''
     return render_template('index.html')
 
 if __name__ == '__main__':
